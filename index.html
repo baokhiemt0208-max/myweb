@@ -1,14 +1,386 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>myweb</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DEMO - Kết quả Xổ Số (Full demo)</title>
+<style>
+  /* ====== Basic reset & vars ====== */
+  :root{
+    --nav:#b71c1c;
+    --accent:#fff4c3;
+    --muted:#666;
+    --bg:#f2f4f6;
+    --card:#fff;
+    --border:#e6e6e6;
+    --primary:#c82333;
+    --blue:#2b7ae4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI", Roboto, Arial, sans-serif;background:var(--bg);color:#222}
+  a{color:var(--primary);text-decoration:none}
+
+  /* ====== Header + nav ====== */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:#fff;border-bottom:1px solid #eee}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:140px;height:40px;background:linear-gradient(90deg,#2ecc71,#3498db);border-radius:6px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+  .date-info{color:#777;font-size:14px}
+
+  nav.primary{background:var(--nav);color:#fff;padding:10px 18px}
+  nav.primary .menu{display:flex;gap:18px;align-items:center;max-width:1200px;margin:0 auto}
+  nav.primary .menu a{color:#fff;font-weight:600}
+
+  /* ====== Layout ====== */
+  .wrap{max-width:1200px;margin:18px auto;display:grid;grid-template-columns:1fr 320px;gap:18px;padding:0 16px}
+  .breadcrumb{font-size:14px;color:#777;margin:12px 0}
+
+  /* ====== Tabs ====== */
+  .tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .tab{background:#fff;padding:8px 12px;border-radius:6px;border:1px solid var(--border);cursor:pointer}
+  .tab.active{background:var(--nav);color:#fff}
+
+  /* ====== Main card (table area) ====== */
+  .main-card{background:var(--card);border-radius:8px;box-shadow:0 6px 16px rgba(0,0,0,0.04);overflow:hidden}
+  .title-box{background:var(--accent);padding:18px;border-bottom:1px solid var(--border);text-align:center;font-weight:800;font-size:18px}
+  .title-links{font-size:13px;margin-top:8px}
+  .controls{display:flex;gap:10px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border)}
+  .controls input,.controls select{padding:8px;border-radius:6px;border:1px solid #ddd}
+  .controls button{padding:8px 12px;border-radius:6px;border:none;background:var(--primary);color:#fff;cursor:pointer}
+
+  /* ====== Table-like result with grid lines ====== */
+  .results{padding:12px 0}
+  .table {width:100%;border-collapse:collapse;background:var(--card)}
+  .tr {display:flex;border-top:1px solid var(--border);align-items:center}
+  .tr:first-child{border-top:none}
+  .td-left{width:80px;padding:18px 12px;text-align:center;font-weight:700;color:var(--muted);border-right:1px solid var(--border);background:#fff}
+  .td-right{flex:1;padding:10px 12px;display:flex;flex-wrap:wrap;gap:18px;justify-content:center;align-items:center;background:#fff}
+
+  /* ball style = số trong ô */
+  .ball{min-width:86px;padding:12px 10px;border-radius:6px;background:#fff;border:1px solid var(--border);text-align:center;font-weight:800;font-family:monospace;font-size:22px}
+  .ball.small{min-width:64px;font-size:18px;padding:8px}
+  .ball.highlight{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .ball.special{color:var(--primary);font-size:30px;padding:14px 18px;background:#fff0f0;border:1px solid #f2c1c1}
+
+  /* bottom digits (0..9 row) */
+  .bottom-row{display:flex;border-top:1px solid var(--border);gap:4px;padding:8px 12px;background:#fff;align-items:center}
+  .btn-digit{padding:8px 10px;border-radius:4px;background:#fff;border:1px solid var(--border);cursor:pointer}
+  .btn-digit.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+  /* ====== Sidebar ====== */
+  .sidebar{display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--card);padding:12px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+  .card h4{margin:0 0 8px 0}
+  .stat-list li{padding:8px 0;border-bottom:1px dashed #eee;color:var(--muted);font-weight:700}
+
+  /* ====== Footer & watermark ====== */
+  footer{text-align:center;color:#777;padding:14px 0}
+  .watermark{position:fixed;right:18px;bottom:18px;background:rgba(0,0,0,0.78);color:#fff;padding:8px 10px;border-radius:6px;font-weight:700;z-index:9999;font-size:13px}
+  @media (max-width:960px){.wrap{grid-template-columns:1fr;padding:0 10px}.ball{min-width:58px;font-size:16px}}
+</style>
 </head>
 <body>
-<h1> 2019</h1>
-<p><strong>tải file tại chỗ này</strong></p>
-<a href="https://drive.google.com/file/d/12yPU9v3m4EUH6MetvQY738Q7BQgvgQwb/view?usp=drive_link" target="_blank">
-    bấm vô đây để tải</a>
 
+<!-- header + nav -->
+<div class="topbar">
+  <div class="brand">
+    <div class="logo">XOSO kiến thiết</div>
+    <div>
+      <div style="font-weight:700">XOSO.COM.VN </div>
+      <div class="date-info">Hôm nay: Thứ Hai ngày 20/10/2025</div>
+    </div>
+  </div>
+  <div style="color:#444">Đăng nhập</div>
+</div>
+
+<nav class="primary">
+  <div class="menu">
+    <a href="#">🏠 Trang chủ</a>
+    <a href="#">XSMB</a>
+    <a href="#">XSMN</a>
+    <a href="#">XSMT</a>
+    <a href="#">VIETLOTT</a>
+    <a href="#">THỐNG KÊ</a>
+    <a href="#">TRA CỨU KQ</a>
+    <a href="#">TIN XỔ SỐ</a>
+  </div>
+</nav>
+
+<!-- main layout -->
+<div class="wrap">
+  <main>
+    <div class="breadcrumb">Trang chủ / Xổ số miền Nam / Xổ số TP Hồ Chí Minh</div>
+
+    <div class="tabs" role="tablist" aria-label="Tabs">
+      <div class="tab">Miền Nam</div>
+      <div class="tab">Thứ 2</div>
+      <div class="tab">Thứ 3</div>
+      <div class="tab">Thứ 4</div>
+      <div class="tab">Thứ 5</div>
+      <div class="tab">Thứ 6</div>
+      <div class="tab active">Thứ 7</div>
+      <div class="tab">Chủ Nhật</div>
+    </div>
+
+    <section class="main-card" aria-labelledby="mainTitle">
+      <div class="title-box" id="mainTitle">
+        XSHCM - Kết quả Xổ số TP Hồ Chí Minh - SXHCM hôm nay
+        <div class="title-links" style="color:#1a73e8">
+          <a href="#">XSMN</a> / <a href="#">XSMN Thứ 7</a> / <a href="#">XSMN 18/10/2025</a>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input id="searchInput" placeholder="Tìm số (vd: 49 hoặc 96876)" style="flex:1" />
+        <select id="regionSelect" style="width:200px">
+          <option value="">Tất cả vùng</option>
+          <option>Hà Nội</option><option>TP. HCM</option><option>Bình Dương</option>
+        </select>
+        <button id="simulate">Mô phỏng kết quả mới</button>
+        <button id="exportCSV">Xuất CSV</button>
+      </div>
+
+      <div class="results">
+        <div class="table" id="tableRoot" role="table">
+          <!-- rows will be injected here -->
+        </div>
+
+        <!-- bottom digits row (0..9) -->
+        <div style="margin-top:8px;background:#fff;padding:10px;border-top:1px solid var(--border)">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div class="btn-digit active">Đầy đủ</div>
+            <div class="btn-digit">2 số</div>
+            <div class="btn-digit">3 số</div>
+            <!-- digits 0..9 -->
+            <div style="display:flex;gap:6px;margin-left:8px;flex-wrap:wrap">
+              <button class="btn-digit" data-digit="0">0</button>
+              <button class="btn-digit" data-digit="1">1</button>
+              <button class="btn-digit" data-digit="2">2</button>
+              <button class="btn-digit" data-digit="3">3</button>
+              <button class="btn-digit" data-digit="4">4</button>
+              <button class="btn-digit" data-digit="5">5</button>
+              <button class="btn-digit" data-digit="6">6</button>
+              <button class="btn-digit" data-digit="7">7</button>
+              <button class="btn-digit" data-digit="8">8</button>
+              <button class="btn-digit" data-digit="9">9</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- sidebar -->
+  <aside class="sidebar">
+    <div class="card">
+      <h4>THỐNG KÊ LOTO</h4>
+      <ul class="stat-list" id="statList">
+        <li>Loto Gan: 03 (20 ngày)</li>
+        <li>TK Đầu-Đuôi</li>
+        <li>Tần suất Loto</li>
+        <li>Theo Tổng</li>
+        <li>Giải Đặc biệt</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>XỔ SỐ HÔM QUA</h4>
+      <ul style="padding-left:0">
+        <li style="list-style:none;padding:8px 0;border-bottom:1px dashed #eee"><a href="#">XSMB</a></li>
+        <li style="list-style:none;padding:8px 0;border-bottom:1px dashed #eee"><a href="#">Đà Lạt</a></li>
+        <li style="list-style:none;padding:8px 0;border-bottom:1px dashed #eee"><a href="#">Kiên Giang</a></li>
+      </ul>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <div style="width:100%;height:90px;background:#f4f4f4;border-radius:6px;display:flex;align-items:center;justify-content:center">Quảng cáo</div>
+    </div>
+  </aside>
+</div>
+
+<footer>Trang chủ XSMB XSMN XSMT Mega 6/45 Xổ số Keno Phân tích Thống kê vị trí Thống kê Lô gan Thống kê tổng hợp Thống kê Keno theo chu kỳ Thống kê tần suất loto Thống kê tần suất cặp loto Thống kê giải đặc biệt ngày mai Tin Xổ số
+Copyright © 2007 - 2025 Xoso.com.vn, All Rights Reserved
+
+Chủ sở hữu: Công ty CP Ứng dụng Công nghệ Truyền thông CTC
+
+Địa chỉ: Tầng 2, Tòa nhà IC, số 82 phố Duy Tân, Phường Cầu Giấy, TP. Hà Nội
+
+Hỗ trợ: 024.6281.2997 - Email: xoso@ctc.com.vn
+
+Website cung cấp thông tin kết quả xổ số kiến thiết hợp pháp tại Việt Nam
+
+Nội dung kết quả xổ số được hợp tác giữa Công ty CTC và Công ty TNHH Một thành viên Xổ số kiến thiết Thủ đô.
+
+Chính sách bảo mật và bảo vệ dữ liệu cá nhân
+
+tai ung dung xo soTải ứng dụng Xo so LIVEgoogle play APPLE godmca protectedfacebookyoutube-channeltwitterNội dung và dịch vụ trên website được chúng tôi cập nhật từ nguồn công khai, chỉ mang tính chất tham khảo. Vui lòng đối chiếu với kết quả chính thức được công bố bởi các công ty xổ số kiến thiết.</footer>
+<div class="watermark">DEMO — For learning only</div>
+
+<script>
+/* =========================
+   Dữ liệu mẫu (cài ở đây, dễ sửa)
+   ========================= */
+const draws = [
+  {
+    date:'2025-10-20',
+    region:'TP. HCM',
+    prizes:{
+      g8:['49'],
+      g7:['551'],
+      g6:['7793','5385','5867'],
+      g5:['5884'],
+      g4:['35044','96876','77407','84801','49132','21773','87865'],
+      g3:['68133','82654'],
+      g2:['80536'],
+      g1:['97111'],
+      special:['567567']
+    }
+  }
+];
+
+/* Thứ tự hiển thị (giống giao diện thật) */
+const prizeOrder = [
+  {key:'g8', label:'8'},
+  {key:'g7', label:'7'},
+  {key:'g6', label:'6'},
+  {key:'g5', label:'5'},
+  {key:'g4', label:'4'},
+  {key:'g3', label:'3'},
+  {key:'g2', label:'2'},
+  {key:'g1', label:'1'},
+  {key:'special', label:'ĐB'}
+];
+
+/* =========================
+   Render bảng kết quả (kẻ ô như trang thật)
+   ========================= */
+function createRow(label, numbers, isSpecial=false){
+  const tr = document.createElement('div');
+  tr.className = 'tr';
+
+  const tdL = document.createElement('div');
+  tdL.className = 'td-left';
+  tdL.textContent = label;
+
+  const tdR = document.createElement('div');
+  tdR.className = 'td-right';
+
+  numbers.forEach(n=>{
+    const d = document.createElement('div');
+    // chọn class theo độ dài (lớn nhỏ) và special
+    d.className = 'ball' + (isSpecial ? ' special' : (n.length >=5 ? '' : ' small'));
+    d.textContent = n;
+    d.dataset.num = n;
+    // click để copy số (tiện troll)
+    d.addEventListener('click', ()=> {
+      navigator.clipboard?.writeText(n).then(()=> {
+        d.style.opacity = '0.7'; setTimeout(()=> d.style.opacity = '1',200);
+      }).catch(()=>{});
+    });
+    tdR.appendChild(d);
+  });
+
+  tr.appendChild(tdL); tr.appendChild(tdR);
+  return tr;
+}
+
+function render(index=0){
+  const root = document.getElementById('tableRoot');
+  root.innerHTML = ''; // xóa rồi render lại
+  const data = draws[index];
+  prizeOrder.forEach(p=>{
+    const nums = data.prizes[p.key] || [];
+    root.appendChild(createRow(p.label, nums, p.key === 'special'));
+  });
+}
+render();
+
+/* =========================
+   Tìm (search) — highlight số chứa chuỗi nhập
+   ========================= */
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('input', ()=> {
+  const q = searchInput.value.trim();
+  highlight(q);
+});
+function highlight(q){
+  document.querySelectorAll('.ball').forEach(b=>{
+    if(!q) b.classList.remove('highlight');
+    else b.classList.toggle('highlight', b.dataset.num.includes(q));
+  });
+}
+
+/* =========================
+   Bottom digits (0..9) filter: highlight số có chữ số cuối tương ứng
+   ========================= */
+document.querySelectorAll('.btn-digit[data-digit]').forEach(btn=>{
+  btn.addEventListener('click', ()=> {
+    const d = btn.dataset.digit;
+    // toggle active class for buttons
+    document.querySelectorAll('.btn-digit[data-digit]').forEach(x=> x.classList.remove('active'));
+    btn.classList.add('active');
+    // highlight numbers ending with digit d
+    document.querySelectorAll('.ball').forEach(b=>{
+      const n = b.dataset.num;
+      if(n && n.endsWith(d)) b.classList.add('highlight');
+      else b.classList.remove('highlight');
+    });
+  });
+});
+
+/* =========================
+   Simulate new draw (push new object top)
+   ========================= */
+document.getElementById('simulate').addEventListener('click', ()=>{
+  const now = new Date().toISOString().slice(0,10);
+  const regs = ['TP. HCM','Hà Nội','Bình Dương','Đà Nẵng'];
+  const reg = regs[Math.floor(Math.random()*regs.length)];
+  const rand = (len=2)=>String(Math.floor(Math.random()*Math.pow(10,len))).padStart(len,'0');
+  const newD = {
+    date:now, region:reg,
+    prizes:{
+      g8:[rand(2)], g7:[rand(3)],
+      g6:[rand(4),rand(4),rand(4)],
+      g5:[rand(4)], g4:[rand(5),rand(5),rand(5),rand(5),rand(5),rand(5),rand(5)],
+      g3:[rand(5),rand(5)], g2:[rand(5)], g1:[rand(5)],
+      special:[String(Math.floor(Math.random()*900000)+100000)]
+    }
+  };
+  draws.unshift(newD);
+  render(0);
+});
+
+/* =========================
+   Export CSV current draw
+   ========================= */
+document.getElementById('exportCSV').addEventListener('click', ()=>{
+  const d = draws[0];
+  const rows = [['Giải','Số']];
+  prizeOrder.forEach(p=>{
+    rows.push([p.label, (d.prizes[p.key]||[]).join(' ')]);
+  });
+  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`xoso_demo_${d.date}.csv`; a.click(); URL.revokeObjectURL(url);
+});
+
+/* =========================
+   Tùy chọn: click vào ball copy, click highlight tìm
+   ========================= */
+/* (đã gán trong createRow) */
+
+/* =========================
+   Ghi chú (hướng dẫn học nhanh)
+   - draws: nơi sửa dữ liệu (thêm kỳ, sửa số)
+   - render(): tạo DOM bảng từ dữ liệu
+   - highlight(q): tìm/sáng số
+   - simulate: thêm kỳ mới (dùng để demo)
+   - exportCSV: xuất file
+   ========================= */
+</script>
+</body>
 </html>
+
+
+
+
